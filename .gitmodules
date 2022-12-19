@@ -1,4 +1,4 @@
-[submodule "Assets/Library/NetworkServicePackage"]
-	path = Assets/Library/NetworkServicePackage
+[submodule "WarFight/Assets/Library/NetworkServicePackage"]
+	path = WarFight/Assets/Library/NetworkServicePackage
 	url = https://github.com/Jimmy01240397/NetworkServicePackage
 	branch = release
