@@ -12,6 +12,6 @@ EditorBuildSettings:
     path: Assets/Scenes/RoomScene.unity
     guid: 50ba1f9a68968444cbd00246d348dc88
   - enabled: 1
-    path: Assets/Scenes/TileMapScene.unity
+    path: Assets/Scenes/GameScene.unity
     guid: 8e4dfbde1fc8a0e43aa6d26ddc67212a
   m_configObjects: {}
