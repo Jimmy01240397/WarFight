@@ -18,7 +18,7 @@ public class ScrptConfirm : MonoBehaviour
 
             if (GetNameWindow != null)
             {
-                GetNameWindow.transform.localPosition += Vector3.up * 500;
+                GetNameWindow.SetActive(false);
                 if (MainWindow != null)
                 {
                     MainWindow.SetActive(true);
