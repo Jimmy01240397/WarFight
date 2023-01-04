@@ -62,18 +62,6 @@ namespace WarFightGameServer
                         }
                     }
                     break;
-                case LoginServerAndGameServerResponseType.AskUserRoomNum:
-                    {
-                        Dictionary<string, object> data = (Dictionary<string, object>)sendData.Parameters;
-
-                        Action<bool, string, string, int> action;
-                        if (Program.appllication.AskUserRoomNumDelegates.TryGetValue(data["Username"].ToString(), out action))
-                        {
-                            Program.appllication.AskUserRoomNumDelegates.Remove(data["Username"].ToString());
-                            action?.Invoke(Convert.ToBoolean(sendData.ReturnCode), data["Username"].ToString(), data["RoomNum"].ToString(), (int)data["index"]);
-                        }
-                    }
-                    break;
             }
         }
 

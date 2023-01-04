@@ -20,27 +20,26 @@ namespace WarFightGameServer
         public RoomList RoomList { get; private set; }
 
         public Dictionary<string, object> DataBase { get; private set; }
-        public Dictionary<string, Action<bool, string, string, int>> AskUserRoomNumDelegates { get; private set; }
 
         public IPEndPoint PublicEndPoint { get; private set; }
 
-        public Appllication(int port, ProtocolType protocol) : base(IPAddress.IPv6Any, port, protocol)
+        public Appllication(string host, int port, ProtocolType protocol) : base(IPAddress.IPv6Any, port, protocol)
         {
-            using (WebClient webClient = new WebClient())
+            if (string.IsNullOrEmpty(host))
             {
-                string ip = webClient.DownloadString("http://ifconfig.me");
-                PublicEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+                using (WebClient webClient = new WebClient())
+                {
+                    host = webClient.DownloadString("http://ifconfig.me");
+                }
             }
+            PublicEndPoint = new IPEndPoint(IPAddress.Parse(host), port);
         }
 
         protected override void Setup()
         {
-            ClientList = new ClientList();
+            ClientList = new ClientList((id) => !string.IsNullOrEmpty(id));
             RoomList = new RoomList();
-            AskUserRoomNumDelegates = new Dictionary<string, Action<bool, string, string, int>>();
             ChuonBinary chuonBinary = new ChuonBinary(File.ReadAllBytes("database.dat"));
-
-            Type type = chuonBinary.ToObject().GetType();
             DataBase = (Dictionary<string, object>)chuonBinary.ToObject();
             RunUpdateThread();
         }

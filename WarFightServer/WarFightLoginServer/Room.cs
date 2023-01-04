@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PacketType;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,6 +57,21 @@ namespace WarFightLoginServer
             PlayerPrepare = new Dictionary<string, bool>();
         }
 
+        public void SendRoomUpdate()
+        {
+            object[][] userdata = new object[PlayerCount][];
+            for (int i = 0; i < Players.Count; i++)
+            {
+                userdata[i] = new object[2];
+                userdata[i][0] = Players[i];
+                userdata[i][1] = PlayerPrepare[Players[i]];
+            }
+            foreach (string user in Players)
+            {
+                Program.appllication.ClientList[user].Tell((byte)LoginServerAndClientEventType.RoomUpdate, new Dictionary<string, object> { { "RoomNUM", RoomNum }, { "users", userdata } });
+            }
+        }
+
         public bool Add(string player)
         {
             lock(locker)
@@ -63,6 +79,7 @@ namespace WarFightLoginServer
                 if (Players.Contains(player) || Players.Count >= PlayerCount) return false;
                 Players.Add(player);
                 PlayerPrepare.Add(player, false);
+                SendRoomUpdate();
                 return true;
             }
         }
@@ -74,6 +91,7 @@ namespace WarFightLoginServer
                 if (!Players.Contains(player)) return false;
                 Players.Remove(player);
                 PlayerPrepare.Remove(player);
+                SendRoomUpdate();
                 return true;
             }
         }
@@ -83,9 +101,7 @@ namespace WarFightLoginServer
             lock (locker)
             {
                 string player = Players[index];
-                Players.Remove(player);
-                PlayerPrepare.Remove(player);
-                return true;
+                return Remove(player);
             }
         }
 
@@ -102,6 +118,7 @@ namespace WarFightLoginServer
             lock(locker)
             {
                 PlayerPrepare[player] = isprepare;
+                SendRoomUpdate();
             }
         }
 

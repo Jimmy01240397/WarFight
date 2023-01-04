@@ -24,6 +24,7 @@ namespace WarFightGameServer
                                 "Usage: WarFightGameServer [options...]\n" +
                                 " -h                           info for command\n" +
                                 " -p <port>                    server port\n" +
+                                " --SetServerIP <ipaddress>    set server ip\n" +
                                 " --LoginServerHost <host>     Login Server Host Ex: --LoginServerHost www.chummydns.com\n" +
                                 " --LoginServerPort <port>     Login Server Port Ex: --LoginServerPort 5800\n"
                                 );
@@ -33,6 +34,7 @@ namespace WarFightGameServer
         static void Main(string[] args)
         {
             int port = 5810;
+            string serverip = null;
             string loginserverhost = null;
             int loginserverport = 5800;
 
@@ -46,6 +48,12 @@ namespace WarFightGameServer
                             port = Convert.ToInt32(args[i]);
                             break;
                         }
+                    case "--SetServerIP":
+                        {
+                            i++;
+                            serverip = args[i];
+                        }
+                        break;
                     case "--LoginServerHost":
                         {
                             i++;
@@ -68,7 +76,7 @@ namespace WarFightGameServer
 
             if (loginserverhost == null) Help();
 
-            appllication = new Appllication(port, System.Net.Sockets.ProtocolType.Udp);
+            appllication = new Appllication(serverip, port, System.Net.Sockets.ProtocolType.Udp);
             appllication.GetMessage += Appllication_GetMessage;
             appllication.Start();
 

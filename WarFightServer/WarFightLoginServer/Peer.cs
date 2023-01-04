@@ -29,40 +29,54 @@ namespace WarFightLoginServer
                     break;
                 case LoginServerClientType.Client:
                     {
-                        switch((LoginServerAndClientRequestType)sendData.Code)
+                        switch ((LoginServerAndClientRequestType)sendData.Code)
                         {
                             case LoginServerAndClientRequestType.Login:
                                 {
                                     string username = sendData.Parameters.ToString();
                                     bool success = appllication.ClientList.Add(username, this);
-                                    Reply((byte)LoginServerAndClientResponseType.Login, null, Convert.ToInt16(success), "");
-                                    if(success && appllication.RoomList.ContainsUsername(username))
+                                    Reply(sendData, (byte)LoginServerAndClientResponseType.Login, null, Convert.ToInt16(success), "");
+                                    if (success && appllication.RoomList.ContainsUsername(username))
                                     {
                                         Room room = appllication.RoomList.GetRoomWithUsername(username);
-                                        if(appllication.GameServerList.Contains(room))
+                                        string[] users = new string[room.PlayerCount];
+                                        room.CopyTo(users, 0);
+                                        Reply(sendData, (byte)LoginServerAndClientResponseType.AddRoom, new Dictionary<string, object> { { "RoomNUM", room.RoomNum }, { "users", users } }, 1, "");
+                                        if (appllication.GameServerList.Contains(room))
                                             Tell((byte)LoginServerAndClientEventType.Start, appllication.GameServerList[room].IPEndPoint.ToString());
                                     }
                                 }
                                 break;
+                            case LoginServerAndClientRequestType.Logout:
+                                {
+                                    Logout();
+                                }
+                                break;
                             case LoginServerAndClientRequestType.AddRoom:
                                 {
-                                    if(!appllication.ClientList.Contains(this))
+                                    if (!appllication.ClientList.Contains(this))
                                     {
-                                        Reply((byte)LoginServerAndClientResponseType.Login, null, 0, "");
-                                    }
-                                    else if (appllication.RoomList.Add((string)sendData.Parameters, appllication.ClientList[this]))
-                                    {
-                                        Room room = appllication.RoomList.GetRoomWithUsername(appllication.ClientList[this]);
-                                        string[] users = new string[room.PlayerCount];
-                                        room.CopyTo(users, 0);
-                                        foreach(string user in room)
-                                        {
-                                            appllication.ClientList[user].Reply((byte)LoginServerAndClientResponseType.AddRoom, new Dictionary<string, object> { { "RoomNUM", room.RoomNum }, { "users", users } }, 1, "");
-                                        }
+                                        Reply(sendData, (byte)LoginServerAndClientResponseType.Login, null, 0, "");
                                     }
                                     else
                                     {
-                                        Reply((byte)LoginServerAndClientResponseType.AddRoom, null, 0, "");
+                                        Reply(sendData, (byte)LoginServerAndClientResponseType.AddRoom, null, Convert.ToInt16(appllication.RoomList.Add((string)sendData.Parameters, appllication.ClientList[this])), "");
+                                    }
+                                }
+                                break;
+                            case LoginServerAndClientRequestType.AskRoomData:
+                                {
+                                    if (!appllication.ClientList.Contains(this))
+                                    {
+                                        Reply(sendData, (byte)LoginServerAndClientResponseType.Login, null, 0, "");
+                                    }
+                                    else if (!appllication.RoomList.ContainsUsername(appllication.ClientList[this]))
+                                    {
+                                        Reply(sendData, (byte)LoginServerAndClientResponseType.AddRoom, null, 0, "");
+                                    }
+                                    else
+                                    {
+                                        appllication.RoomList.GetRoomWithUsername(appllication.ClientList[this]).SendRoomUpdate();
                                     }
                                 }
                                 break;
@@ -70,9 +84,9 @@ namespace WarFightLoginServer
                                 {
                                     if (!appllication.ClientList.Contains(this))
                                     {
-                                        Reply((byte)LoginServerAndClientResponseType.Login, null, 0, "");
+                                        Reply(sendData, (byte)LoginServerAndClientResponseType.Login, null, 0, "");
                                     }
-                                    else if (appllication.RoomList.ContainsUsername(appllication.ClientList[this]) && 
+                                    else if (appllication.RoomList.ContainsUsername(appllication.ClientList[this]) &&
                                             !appllication.GameServerList.Contains(appllication.RoomList.GetRoomWithUsername(appllication.ClientList[this])))
                                     {
                                         Room room = appllication.RoomList.GetRoomWithUsername(appllication.ClientList[this]);
@@ -99,7 +113,7 @@ namespace WarFightLoginServer
                                         success = appllication.GameServerList.Add(this, TraceRoute.IPEndPointParse(sendData.Parameters.ToString(), AddressFamily.InterNetworkV6));
                                     }
                                     catch (Exception) { }
-                                    Reply((byte)LoginServerAndClientResponseType.Login, null, Convert.ToInt16(success), "");
+                                    Reply(sendData, (byte)LoginServerAndClientResponseType.Login, null, Convert.ToInt16(success), "");
                                 }
                                 break;
                             case LoginServerAndGameServerRequestType.AskUserRoomNum:
@@ -108,11 +122,11 @@ namespace WarFightLoginServer
                                     if(appllication.ClientList.Contains(username) && appllication.RoomList.ContainsUsername(username))
                                     {
                                         Room room = appllication.RoomList.GetRoomWithUsername(username);
-                                        Reply((byte)LoginServerAndGameServerResponseType.AskUserRoomNum, new Dictionary<string, object>() { { "Username", username }, { "RoomNum", room.RoomNum }, { "index", room.IndexOf(username) } }, 1, "");
+                                        Reply(sendData, (byte)LoginServerAndGameServerResponseType.AskUserRoomNum, new Dictionary<string, object>() { { "Username", username }, { "RoomNum", room.RoomNum }, { "index", room.IndexOf(username) } }, 1, "");
                                     }
                                     else
                                     {
-                                        Reply((byte)LoginServerAndGameServerResponseType.AskUserRoomNum, new Dictionary<string, object>() { { "Username", username }, { "RoomNum", "" }, { "index", 0 } }, 0, "");
+                                        Reply(sendData, (byte)LoginServerAndGameServerResponseType.AskUserRoomNum, new Dictionary<string, object>() { { "Username", username }, { "RoomNum", "" }, { "index", 0 } }, 0, "");
                                     }
                                 }
                                 break;
@@ -128,16 +142,27 @@ namespace WarFightLoginServer
             }
         }
 
+        public void Logout()
+        {
+            if (appllication.ClientList.Contains(this))
+            {
+                if (appllication.RoomList.ContainsUsername(appllication.ClientList[this]))
+                {
+                    Room room = appllication.RoomList.GetRoomWithUsername(appllication.ClientList[this]);
+                    if (!appllication.GameServerList.Contains(room))
+                        appllication.RoomList.RemoveByUsername(appllication.ClientList[this]);
+                }
+                appllication.ClientList.Remove(this);
+            }
+        }
+
         public override void OnDisconnect()
         {
             switch (clientType)
             {
                 case LoginServerClientType.Client:
                     {
-                        Room room = appllication.RoomList.GetRoomWithUsername(appllication.ClientList[this]);
-                        if (!appllication.GameServerList.Contains(room))
-                            appllication.RoomList.RemoveByUsername(appllication.ClientList[this]);
-                        appllication.ClientList.Remove(this);
+                        Logout();
                     }
                     break;
                 case LoginServerClientType.GameServer:

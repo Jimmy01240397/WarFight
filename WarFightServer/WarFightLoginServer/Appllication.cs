@@ -22,7 +22,7 @@ namespace WarFightLoginServer
 
         protected override void Setup()
         {
-            ClientList = new ClientList();
+            ClientList = new ClientList((id) => !string.IsNullOrEmpty(id));
             GameServerList = new GameServerList();
             RoomList = new RoomList(2);
 

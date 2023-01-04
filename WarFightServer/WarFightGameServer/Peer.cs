@@ -24,29 +24,36 @@ namespace WarFightGameServer
                 case GameServerAndClientRequestType.Login:
                     {
                         string username = sendData.Parameters.ToString();
-                        appllication.AskUserRoomNumDelegates.Add(username, (success, name, RoomNUM, index) =>
+                        Program.client.ClientLinker.Ask((byte)LoginServerAndGameServerRequestType.AskUserRoomNum, username, (responsesendData) =>
                         {
-                            bool nowsuccess = success && appllication.ClientList.Add(username, this);
-                            if (nowsuccess)
+                            switch ((LoginServerAndGameServerResponseType)responsesendData.Code)
                             {
-                                appllication.RoomList.Add(RoomNUM, username, index);
+                                case LoginServerAndGameServerResponseType.AskUserRoomNum:
+                                    {
+                                        Dictionary<string, object> data = (Dictionary<string, object>)responsesendData.Parameters;
+                                        bool nowsuccess = Convert.ToBoolean(responsesendData.ReturnCode) && appllication.ClientList.Add(username, this);
+                                        if (nowsuccess)
+                                        {
+                                            appllication.RoomList.Add(data["RoomNum"].ToString(), username, (int)data["index"]);
+                                        }
+                                        Reply(sendData, (byte)GameServerAndClientResponseType.Login, (int)data["index"], Convert.ToInt16(nowsuccess), "");
+                                    }
+                                    break;
                             }
-                            Reply((byte)GameServerAndClientResponseType.Login, index, Convert.ToInt16(nowsuccess), "");
-                        });
-                        Program.client.ClientLinker.Ask((byte)LoginServerAndGameServerRequestType.AskUserRoomNum, username);
+                        }, 1000);
                     }
                     break;
                 case GameServerAndClientRequestType.GetMap:
                     {
                         if (!appllication.ClientList.Contains(this))
                         {
-                            Reply((byte)GameServerAndClientResponseType.Login, null, 0, "");
+                            Reply(sendData, (byte)GameServerAndClientResponseType.Login, null, 0, "");
                         }
                         else
                         {
                             string username = appllication.ClientList[this];
                             Room room = appllication.RoomList.GetRoomWithUsername(username);
-                            Reply((byte)GameServerAndClientResponseType.GetMap, new Dictionary<string, object>() { { "MapObjects", room.MapObjects }, { "TileMap", room.Map.ToArray() } }, 0, "");
+                            Reply(sendData, (byte)GameServerAndClientResponseType.GetMap, new Dictionary<string, object>() { { "MapObjects", room.MapObjects }, { "TileMap", room.Map.ToArray() } }, 0, "");
                         }
                     }
                     break;

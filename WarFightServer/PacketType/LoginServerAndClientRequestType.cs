@@ -9,7 +9,9 @@ namespace PacketType
     public enum LoginServerAndClientRequestType
     {
         Login = 0,
+        Logout,
         AddRoom,
+        AskRoomData,
         Prepare
     }
 }

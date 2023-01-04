@@ -119,6 +119,10 @@ namespace WarFightLoginServer
                 GameServer gameServer = dict[room];
                 dict.Remove(room);
                 gameServer.Remove(room);
+                foreach(string player in room)
+                {
+                    room.SetPlayerPrepare(player, false);
+                }
                 gameServer.Peer.Tell((byte)LoginServerAndGameServerEventType.EndGame, room.RoomNum);
                 foreach (string player in room)
                 {
@@ -137,6 +141,7 @@ namespace WarFightLoginServer
             {
                 if (!list.Contains(gameServer)) return false;
                 Room[] rooms = new Room[gameServer.Count];
+                gameServer.CopyTo(rooms, 0);
                 foreach(Room room in rooms)
                 {
                     Remove(room);

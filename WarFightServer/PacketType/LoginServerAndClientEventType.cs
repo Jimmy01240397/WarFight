@@ -8,6 +8,7 @@ namespace PacketType
     public enum LoginServerAndClientEventType
     {
         Start = 0,
+        RoomUpdate,
         EndGame
     }
 }
