@@ -11,7 +11,7 @@ public class ScrptChangeName : MonoBehaviour
     {
         if (GetNameWindow != null)
         {
-            GetNameWindow.transform.localPosition += Vector3.down * 500;
+            GetNameWindow.SetActive(true);
             if (MainWindow != null)
             {
                 MainWindow.SetActive(false);
