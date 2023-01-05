@@ -59,16 +59,20 @@ namespace WarFightLoginServer
 
         public void SendRoomUpdate()
         {
-            object[][] userdata = new object[PlayerCount][];
-            for (int i = 0; i < Players.Count; i++)
+            lock (locker)
             {
-                userdata[i] = new object[2];
-                userdata[i][0] = Players[i];
-                userdata[i][1] = PlayerPrepare[Players[i]];
-            }
-            foreach (string user in Players)
-            {
-                Program.appllication.ClientList[user].Tell((byte)LoginServerAndClientEventType.RoomUpdate, new Dictionary<string, object> { { "RoomNUM", RoomNum }, { "users", userdata } });
+                object[][] userdata = new object[PlayerCount][];
+                for (int i = 0; i < Players.Count; i++)
+                {
+                    userdata[i] = new object[2];
+                    userdata[i][0] = Players[i];
+                    userdata[i][1] = PlayerPrepare[Players[i]];
+                }
+                foreach (string user in Players)
+                {
+                    if (Program.appllication.ClientList.Contains(user))
+                        Program.appllication.ClientList[user].Tell((byte)LoginServerAndClientEventType.RoomUpdate, new Dictionary<string, object> { { "RoomNUM", RoomNum }, { "users", userdata } });
+                }
             }
         }
 

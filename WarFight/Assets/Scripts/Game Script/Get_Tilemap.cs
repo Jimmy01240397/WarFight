@@ -35,7 +35,6 @@ public class Get_Tilemap : MonoBehaviour
                 case GameServerAndClientResponseType.GetMap:
                     {
                         Dictionary<string, object> mapdata = (Dictionary<string, object>)responsedata.Parameters;
-                        GameManager.Instance.MapObjects = (IDictionary[])mapdata["MapObjects"];
                         byte[][] tileData = (byte[][])mapdata["TileMap"];
                         for (int i = 0; i < tileData.Length; i++)
                         {

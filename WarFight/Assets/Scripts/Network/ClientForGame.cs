@@ -58,6 +58,14 @@ public class ClientForGame : ClientListen
                     }
                 }
                 break;
+            case GameServerAndClientResponseType.GetMap:
+                {
+                    Dictionary<string, object> mapdata = (Dictionary<string, object>)sendData.Parameters;
+                    GameManager.Instance.MapObjects = (IDictionary[])mapdata["MapObjects"];
+                    GameManager.Instance.Builds = (Dictionary<string, IDictionary>)mapdata["builds"];
+                    GameManager.Instance.People = (Dictionary<string, IDictionary>)mapdata["people"];
+                }
+                break;
         }
     }
 

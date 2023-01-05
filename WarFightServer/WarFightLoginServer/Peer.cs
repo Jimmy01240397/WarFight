@@ -41,7 +41,7 @@ namespace WarFightLoginServer
                                         Room room = appllication.RoomList.GetRoomWithUsername(username);
                                         string[] users = new string[room.PlayerCount];
                                         room.CopyTo(users, 0);
-                                        Reply(sendData, (byte)LoginServerAndClientResponseType.AddRoom, new Dictionary<string, object> { { "RoomNUM", room.RoomNum }, { "users", users } }, 1, "");
+                                        room.SendRoomUpdate();
                                         if (appllication.GameServerList.Contains(room))
                                             Tell((byte)LoginServerAndClientEventType.Start, appllication.GameServerList[room].IPEndPoint.ToString());
                                     }

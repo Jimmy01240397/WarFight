@@ -53,7 +53,7 @@ namespace WarFightGameServer
                         {
                             string username = appllication.ClientList[this];
                             Room room = appllication.RoomList.GetRoomWithUsername(username);
-                            Reply(sendData, (byte)GameServerAndClientResponseType.GetMap, new Dictionary<string, object>() { { "MapObjects", room.MapObjects }, { "TileMap", room.Map.ToArray() } }, 0, "");
+                            Reply(sendData, (byte)GameServerAndClientResponseType.GetMap, new Dictionary<string, object>() { { "builds", appllication.DataBase["builds"] }, { "people", appllication.DataBase["people"] }, { "MapObjects", room.MapObjects }, { "TileMap", room.Map.ToArray() } }, 0, "");
                         }
                     }
                     break;
