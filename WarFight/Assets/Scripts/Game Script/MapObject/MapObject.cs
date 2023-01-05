@@ -30,9 +30,9 @@ public class MapObject : MonoBehaviour
             lifelineobj.transform.SetParent(transform, false);
         }
         lifeline = GetComponentInChildren<Slider>();
-        Debug.Log(GetComponent<SpriteRenderer>().bounds.size);
-        lifeline.GetComponent<RectTransform>().sizeDelta = new Vector2(GetComponent<SpriteRenderer>().bounds.size.x, 3);
-        lifeline.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, GetComponent<SpriteRenderer>().bounds.size.y / 2 + 4);
+        Debug.Log(GetComponent<SpriteRenderer>().sprite.rect.size);
+        lifeline.GetComponent<RectTransform>().sizeDelta = new Vector2(GetComponent<SpriteRenderer>().sprite.rect.size.x, 3);
+        lifeline.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, GetComponent<SpriteRenderer>().sprite.rect.size.y / 2 + 4);
     }
 
     // Start is called before the first frame update

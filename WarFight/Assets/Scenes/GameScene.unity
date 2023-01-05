@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 19433138}
   - component: {fileID: 19433137}
   - component: {fileID: 19433140}
+  - component: {fileID: 19433141}
   m_Layer: 0
   m_Name: warrior
   m_TagString: Untagged
@@ -243,6 +244,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 19433137}
+--- !u!114 &19433141
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 19433136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24cb13943f0618a41a6d1c554f340557, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &79909652
 GameObject:
   m_ObjectHideFlags: 0
@@ -1099,10 +1112,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 19433139}
     m_Modifications:
-    - target: {fileID: 4713341117492632896, guid: 1071fc425efb7b94396f994469cd5e80, type: 3}
-      propertyPath: m_Camera
-      value: 
-      objectReference: {fileID: 1000754412}
     - target: {fileID: 4713341117492632899, guid: 1071fc425efb7b94396f994469cd5e80, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
