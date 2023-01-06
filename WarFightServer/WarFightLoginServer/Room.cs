@@ -144,12 +144,18 @@ namespace WarFightLoginServer
 
         public void CopyTo(Array array, int index)
         {
-            ((ICollection)Players).CopyTo(array, index);
+            lock (locker)
+            {
+                ((ICollection)Players).CopyTo(array, index);
+            }
         }
 
         public IEnumerator GetEnumerator()
         {
-            return ((IEnumerable)Players).GetEnumerator();
+            lock (locker)
+            {
+                return ((IEnumerable)Players).GetEnumerator();
+            }
         }
     }
 }

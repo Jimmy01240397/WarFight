@@ -193,12 +193,18 @@ namespace WarFightLoginServer
 
         public void CopyTo(Array array, int index)
         {
-            ((ICollection)list).CopyTo(array, index);
+            lock (locker)
+            {
+                ((ICollection)list).CopyTo(array, index);
+            }
         }
 
         public IEnumerator GetEnumerator()
         {
-            return ((IEnumerable)list).GetEnumerator();
+            lock (locker)
+            {
+                return ((IEnumerable)list).GetEnumerator();
+            }
         }
     }
 }

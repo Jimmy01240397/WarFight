@@ -53,9 +53,13 @@
   <ItemGroup>
     <Compile Include="Appllication.cs" />
     <Compile Include="AStar.cs" />
+    <Compile Include="BuildingObject.cs" />
     <Compile Include="ClientList.cs" />
     <Compile Include="ClientToLoginServer.cs" />
+    <Compile Include="MapObject.cs" />
+    <Compile Include="MapObjectList.cs" />
     <Compile Include="Peer.cs" />
+    <Compile Include="PeopleObject.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Room.cs" />

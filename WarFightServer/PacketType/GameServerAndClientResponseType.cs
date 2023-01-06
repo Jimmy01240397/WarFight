@@ -8,6 +8,7 @@ namespace PacketType
     public enum GameServerAndClientResponseType
     {
         Login = 0,
-        GetMap
+        GetMap,
+        GetMapObjects
     }
 }

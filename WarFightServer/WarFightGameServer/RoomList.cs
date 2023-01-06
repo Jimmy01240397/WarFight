@@ -61,6 +61,15 @@ namespace WarFightGameServer
             list = new List<Room>();
         }
 
+        public void Update()
+        {
+            lock (locker)
+            {
+                foreach (Room room in this)
+                    room.Update();
+            }
+        }
+
         public Room GetRoomWithUsername(string username)
         {
             lock (locker)
@@ -183,12 +192,18 @@ namespace WarFightGameServer
 
         public void CopyTo(Array array, int index)
         {
-            ((ICollection)list).CopyTo(array, index);
+            lock (locker)
+            {
+                ((ICollection)list).CopyTo(array, index);
+            }
         }
 
         public IEnumerator GetEnumerator()
         {
-            return ((IEnumerable)list).GetEnumerator();
+            lock (locker)
+            {
+                return ((IEnumerable)list).GetEnumerator();
+            }
         }
     }
 }

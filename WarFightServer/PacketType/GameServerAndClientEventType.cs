@@ -7,5 +7,6 @@ namespace PacketType
 {
     public enum GameServerAndClientEventType
     {
+        UpdateMapObjects = 0
     }
 }

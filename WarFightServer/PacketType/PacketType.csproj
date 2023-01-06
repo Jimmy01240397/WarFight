@@ -52,6 +52,7 @@
     <Compile Include="LoginServerAndGameServerResponseType.cs" />
     <Compile Include="LoginServerClientType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tools.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
