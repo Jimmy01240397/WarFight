@@ -7,8 +7,10 @@ using Chuon;
 using PacketType;
 using UnityEngine.SceneManagement;
 
-public class Get_Tilemap : MonoBehaviour
+public class TilemapSetting : MonoBehaviour
 {
+    public const int unit = 32;
+
     public Tile[] tiles;
     private Tilemap tilemap;
     // Start is called before the first frame update
@@ -53,7 +55,7 @@ public class Get_Tilemap : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        TileBase tile = tilemap.GetTile(new Vector3Int(-3, 1));
     }
 
     void TilemapToChuon()

@@ -6,9 +6,13 @@ public class GameManager : MonoBehaviour
 {
     public float SelectLineWidthUnit = 0.025f;
 
-    public IDictionary[] MapObjects { get; set; }
+    public MapObjectList MapObjects { get; private set; }
     public Dictionary<string, IDictionary> Builds { get; set; }
     public Dictionary<string, IDictionary> People { get; set; }
+
+    public (int, int) Population { get; set; }
+    public (int, int) Food { get; set; }
+    public (int, int) Ore { get; set; }
 
     public Vector3 SelectStart { get; private set; }
     public Vector3 SelectEnd { get; private set; }
@@ -21,6 +25,12 @@ public class GameManager : MonoBehaviour
             return GameObject.Find("GameManager").GetComponent<GameManager>();
         }
     }
+
+    private void Awake()
+    {
+        MapObjects = new MapObjectList();
+    }
+
     // Start is called before the first frame update
     void Start()
     {

@@ -98,12 +98,18 @@ namespace WarFightLoginServer
 
         public void CopyTo(Array array, int index)
         {
-            ((ICollection)rooms).CopyTo(array, index);
+            lock (locker)
+            {
+                ((ICollection)rooms).CopyTo(array, index);
+            }
         }
 
         public IEnumerator GetEnumerator()
         {
-            return ((IEnumerable)rooms).GetEnumerator();
+            lock (locker)
+            {
+                return ((IEnumerable)rooms).GetEnumerator();
+            }
         }
     }
 }

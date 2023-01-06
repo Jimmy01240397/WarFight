@@ -33,7 +33,23 @@ public class ClientForGame : ClientListen
     {
         switch ((GameServerAndClientEventType)sendData.Code)
         {
-
+            case GameServerAndClientEventType.UpdateMapObjects:
+                {
+                    int hash = (int)((IDictionary)sendData.Parameters)["hash"];
+                    GameManager.Instance.Population = (((int[])((IDictionary)sendData.Parameters)["population"])[0], ((int[])((IDictionary)sendData.Parameters)["population"])[1]);
+                    GameManager.Instance.Food = (((int[])((IDictionary)sendData.Parameters)["food"])[0], ((int[])((IDictionary)sendData.Parameters)["food"])[1]);
+                    GameManager.Instance.Ore = (((int[])((IDictionary)sendData.Parameters)["ore"])[0], ((int[])((IDictionary)sendData.Parameters)["ore"])[1]);
+                    IDictionary[] MapObjectData = (IDictionary[])((IDictionary)sendData.Parameters)["MapObjects"];
+                    foreach(IDictionary data in MapObjectData)
+                    {
+                        GameManager.Instance.MapObjects.SetMapObject(data);
+                    }
+                    if(hash != GameManager.Instance.MapObjects.GetHashCode())
+                    {
+                        ClientLinker.Ask((byte)GameServerAndClientRequestType.GetMapObjects, null);
+                    }
+                }
+                break;
         }
     }
 
@@ -61,9 +77,19 @@ public class ClientForGame : ClientListen
             case GameServerAndClientResponseType.GetMap:
                 {
                     Dictionary<string, object> mapdata = (Dictionary<string, object>)sendData.Parameters;
-                    GameManager.Instance.MapObjects = (IDictionary[])mapdata["MapObjects"];
-                    GameManager.Instance.Builds = (Dictionary<string, IDictionary>)mapdata["builds"];
-                    GameManager.Instance.People = (Dictionary<string, IDictionary>)mapdata["people"];
+                    //GameManager.Instance.MapObjects = (IDictionary[])mapdata["MapObjects"];
+                    GameManager.Instance.Builds = (Dictionary<string, IDictionary>)mapdata["Builds"];
+                    GameManager.Instance.People = (Dictionary<string, IDictionary>)mapdata["People"];
+                    Camera.main.transform.position = new Vector3(((int[])mapdata["CameraPosition"])[0], ((int[])mapdata["CameraPosition"])[1], Camera.main.transform.position.z);
+                }
+                break;
+            case GameServerAndClientResponseType.GetMapObjects:
+                {
+                    GameManager.Instance.Population = (((int[])((IDictionary)sendData.Parameters)["population"])[0], ((int[])((IDictionary)sendData.Parameters)["population"])[1]);
+                    GameManager.Instance.Food = (((int[])((IDictionary)sendData.Parameters)["food"])[0], ((int[])((IDictionary)sendData.Parameters)["food"])[1]);
+                    GameManager.Instance.Ore = (((int[])((IDictionary)sendData.Parameters)["ore"])[0], ((int[])((IDictionary)sendData.Parameters)["ore"])[1]);
+                    IDictionary[] MapObjectData = (IDictionary[])((IDictionary)sendData.Parameters)["MapObjects"];
+                    GameManager.Instance.MapObjects.ResetMapObjects(MapObjectData);
                 }
                 break;
         }
