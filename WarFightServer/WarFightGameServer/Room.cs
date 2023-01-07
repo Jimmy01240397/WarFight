@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using PacketType;
+using WarFightGameServer.Builds;
+using WarFightGameServer.People;
 
 namespace WarFightGameServer
 {
@@ -63,7 +65,35 @@ namespace WarFightGameServer
             InitMapObjectDatas = (IDictionary[])mapdata["InitMapObjectDatas"];
             for(int i = 0; i < InitMapObjectDatas.Length; i++)
             {
-                //MapObjects.Add<>
+                MainBuild mainBuild = null;
+                foreach(IDictionary data in (IDictionary[])InitMapObjectDatas[i]["Builds"])
+                {
+                    switch((string)data["type"])
+                    {
+                        case "mainbuild":
+                            {
+                                mainBuild = (MainBuild)MapObjects.Add<MainBuild>(this, i, (int)data["x"], (int)data["y"]);
+                            }
+                            break;
+                    }
+                }
+                foreach (IDictionary data in (IDictionary[])InitMapObjectDatas[i]["People"])
+                {
+                    for (int k = 0; k < (int)data["count"]; k++)
+                    {
+                        switch ((string)data["type"])
+                        {
+                            case "villager":
+                                {
+                                    MapObjects.Add<Villager>(this, i,
+                                        new Random(Guid.NewGuid().GetHashCode()).Next(mainBuild.x - mainBuild.width / 2, mainBuild.x + mainBuild.width / 2 + 1),
+                                        new Random(Guid.NewGuid().GetHashCode()).Next(mainBuild.y - mainBuild.height / 2, mainBuild.y + mainBuild.height / 2 + 1)
+                                        );
+                                }
+                                break;
+                        }
+                    }
+                }
             }
         }
 
@@ -90,7 +120,7 @@ namespace WarFightGameServer
                 }
                 for (int i = 0; i < Players.Length; i++)
                 {
-                    if (Program.appllication.ClientList.Contains(Players[i]))
+                    if (Players[i] != null && Program.appllication.ClientList.Contains(Players[i]))
                         Program.appllication.ClientList[Players[i]].Tell((byte)GameServerAndClientEventType.UpdateMapObjects, new Dictionary<string, object> 
                         {
                             { "hash", MapObjects.GetHashCode() },

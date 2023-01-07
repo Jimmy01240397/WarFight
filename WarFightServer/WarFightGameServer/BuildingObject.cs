@@ -9,6 +9,7 @@ namespace WarFightGameServer
 {
     public class BuildingObject : MapObject
     {
+        public override string type => base.type + "Builds";
         public override int width
         {
             get
@@ -27,7 +28,6 @@ namespace WarFightGameServer
 
         public BuildingObject(Room room, int OwnerIndex, int x, int y) : base(room, OwnerIndex, x, y)
         {
-            type = "Builds";
         }
 
         public override void Update()

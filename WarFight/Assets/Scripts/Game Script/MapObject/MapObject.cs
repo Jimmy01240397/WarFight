@@ -29,22 +29,29 @@ public abstract class MapObject : MonoBehaviour
     {
         ID = (int)data["ID"];
         OwnerIndex = (int)data["OwnerIndex"];
-        Life = (int)data["Life"];
-        Vector3 position = GetComponentInParent<TilemapSetting>().GetComponent<Tilemap>().CellToLocal(new Vector3Int((int)data["x"], (int)data["y"]));
-        transform.localPosition = new Vector3(position.x, position.y, transform.localPosition.z);
-        lifeline.GetComponent<Image>().color = OwnerIndex == -1 ? Color.white : (OwnerIndex == Array.IndexOf(Manager.Instance.RoomPlayer, Manager.Instance.Username) ? Color.blue : Color.red);
+        Life = (float)data["Life"];
+        Vector3 position = GetComponentInParent<TilemapSetting>().GetComponent<Tilemap>().CellToLocal(new Vector3Int((int)data["x"], (int)data["y"])) + GetComponentInParent<TilemapSetting>().GetComponent<Tilemap>().CellToLocal(new Vector3Int(1, 1)) / 2;
+        transform.localPosition = new Vector3(position.x, position.y, transform.localPosition.z) ;
+        lifeline.GetComponentInChildren<Image>().color = OwnerIndex == -1 ? Color.white : (OwnerIndex == Array.IndexOf(Manager.Instance.RoomPlayer, Manager.Instance.Username) ? Color.blue : Color.red);
     }
 
     public override int GetHashCode()
     {
         Tilemap tilemap = GetComponentInParent<TilemapSetting>().GetComponent<Tilemap>();
-        return PacketType.Tools.HashCombine(GetHashCode(), 
-               PacketType.Tools.HashCombine(tilemap.LocalToCell(transform.localPosition).x.GetHashCode(), 
-               PacketType.Tools.HashCombine(tilemap.LocalToCell(transform.localPosition).y.GetHashCode(), 
+        int[] test = new int[] { ID, tilemap.LocalToCell(transform.localPosition - GetComponentInParent<TilemapSetting>().GetComponent<Tilemap>().CellToLocal(new Vector3Int(1, 1)) / 2).x,
+            tilemap.LocalToCell(transform.localPosition - GetComponentInParent<TilemapSetting>().GetComponent<Tilemap>().CellToLocal(new Vector3Int(1, 1)) / 2).y,
+            OwnerIndex, lifeline.value.GetHashCode(), false.GetHashCode() };
+        int[] test2 = new int[] { ID, tilemap.LocalToCell(transform.localPosition - GetComponentInParent<TilemapSetting>().GetComponent<Tilemap>().CellToLocal(new Vector3Int(1, 1)) / 2).x.GetHashCode(),
+            tilemap.LocalToCell(transform.localPosition - GetComponentInParent<TilemapSetting>().GetComponent<Tilemap>().CellToLocal(new Vector3Int(1, 1)) / 2).y.GetHashCode(),
+            OwnerIndex.GetHashCode(), lifeline.value.GetHashCode(), false.GetHashCode() };
+        int hash = PacketType.Tools.HashCombine(ID, 
+               PacketType.Tools.HashCombine(tilemap.LocalToCell(transform.localPosition - GetComponentInParent<TilemapSetting>().GetComponent<Tilemap>().CellToLocal(new Vector3Int(1, 1)) / 2).x.GetHashCode(), 
+               PacketType.Tools.HashCombine(tilemap.LocalToCell(transform.localPosition - GetComponentInParent<TilemapSetting>().GetComponent<Tilemap>().CellToLocal(new Vector3Int(1, 1)) / 2).y.GetHashCode(), 
                PacketType.Tools.HashCombine(OwnerIndex.GetHashCode(), 
                PacketType.Tools.HashCombine(lifeline.value.GetHashCode(), 
                                             false.GetHashCode()
                )))));
+        return hash;
     }
 
     protected virtual void Awake()

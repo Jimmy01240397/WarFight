@@ -124,12 +124,15 @@ namespace WarFightLoginServer
                     room.SetPlayerPrepare(player, false);
                 }
                 gameServer.Peer.Tell((byte)LoginServerAndGameServerEventType.EndGame, room.RoomNum);
-                foreach (string player in room)
+                for (int i = 0; i < room.Count; i++)
                 {
-                    if (Program.appllication.ClientList.Contains(player))
-                        Program.appllication.ClientList[player].Tell((byte)LoginServerAndClientEventType.EndGame, new Dictionary<string, string>() { { "endpoint", gameServer.IPEndPoint.ToString() }, { "winplayer", win } });
+                    if (Program.appllication.ClientList.Contains(room[i]))
+                        Program.appllication.ClientList[room[i]].Tell((byte)LoginServerAndClientEventType.EndGame, new Dictionary<string, string>() { { "endpoint", gameServer.IPEndPoint.ToString() }, { "winplayer", win } });
                     else
-                        Program.appllication.RoomList.RemoveByUsername(player);
+                    {
+                        Program.appllication.RoomList.RemoveByUsername(room[i]);
+                        i--;
+                    }
                 }
                 return true;
             }

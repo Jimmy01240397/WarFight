@@ -65,18 +65,19 @@ namespace WarFightGameServer
             GetMessage?.Invoke(messageType, msg);
         }
 
-        public new void Update()
+        public override void Update()
         {
             updatetime.Stop();
             deltaTime = updatetime.ElapsedMilliseconds / 1000f;
             updatetime.Restart();
 
             base.Update();
-
             foreach (Room room in RoomList)
             {
                 room.Update();
             }
+            if(Program.client != null)
+                Program.client.ClientLinker.Update();
         }
     }
 }

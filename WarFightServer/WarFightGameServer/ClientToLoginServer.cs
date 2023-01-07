@@ -22,7 +22,6 @@ namespace WarFightGameServer
         public bool Connect(string host, int port)
         {
             bool on = ClientLinker.Connect(host, port);
-            ClientLinker.RunUpdateThread();
             return on;
         }
 

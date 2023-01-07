@@ -53,7 +53,7 @@ namespace WarFightGameServer
                         {
                             string username = appllication.ClientList[this];
                             Room room = appllication.RoomList.GetRoomWithUsername(username);
-                            MapObject mymainbuild = room.MapObjects.ToArray("Builds", "mainbuild").Where((mapObject) => mapObject.OwnerIndex == room.IndexOf(username)).First();
+                            MapObject mymainbuild = room.MapObjects.ToArray("Builds", "mainbuild", room.IndexOf(username)).First();
                             Reply(sendData, (byte)GameServerAndClientResponseType.GetMap, new Dictionary<string, object>() 
                             { 
                                 { "Builds", appllication.DataBase["Builds"] }, 
@@ -71,7 +71,7 @@ namespace WarFightGameServer
                         foreach (MapObject mapObject in room.MapObjects.ToArray())
                             sendMapObjectList.Add(mapObject.ObjectToData());
 
-                        Reply(sendData, (byte)GameServerAndClientEventType.UpdateMapObjects, new Dictionary<string, object>
+                        Reply(sendData, (byte)GameServerAndClientResponseType.GetMapObjects, new Dictionary<string, object>
                         {
                             { "population", new int[] { room.MapObjects.GetAttributeSum<int>("People", "population", room.IndexOf(appllication.ClientList[this])), room.MapObjects.GetAttributeSum<int>("Builds", "population", room.IndexOf(appllication.ClientList[this])) } },
                             { "food", new int[] { room.MapObjects.GetAttributeSum<int>("People", "food", room.IndexOf(appllication.ClientList[this])), room.MapObjects.GetAttributeSum<int>("Builds", "food", room.IndexOf(appllication.ClientList[this])) } },

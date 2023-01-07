@@ -10,7 +10,8 @@ namespace WarFightGameServer
 {
     public abstract class MapObject
     {
-        public string type { get; protected set; }
+        public virtual string type => "";
+
         public Room Room { get; private set; }
         public int x { get; set; }
         public int y { get; set; }
@@ -30,7 +31,6 @@ namespace WarFightGameServer
             this.OwnerIndex = OwnerIndex;
             this.x = x;
             this.y = y;
-            type = "";
             Life = (float)((Dictionary<string, IDictionary>)Program.appllication.DataBase[type.Split('/')[0]])[type.Split('/')[1]]["life"];
             IsDestroy = false;
             width = 1;
@@ -61,13 +61,16 @@ namespace WarFightGameServer
         public virtual int Hash()
         {
             float maxlife = (float)((Dictionary<string, IDictionary>)Program.appllication.DataBase[type.Split('/')[0]])[type.Split('/')[1]]["life"];
-            return Tools.HashCombine(GetHashCode(), 
+            int[] test = new int[] { GetHashCode(), x, y, OwnerIndex, (Life / maxlife).GetHashCode(), IsDestroy.GetHashCode() };
+            int[] test2 = new int[] { GetHashCode(), x.GetHashCode(), y.GetHashCode(), OwnerIndex.GetHashCode(), (Life / maxlife).GetHashCode(), IsDestroy.GetHashCode() };
+            int hash = Tools.HashCombine(GetHashCode(), 
                    Tools.HashCombine(x.GetHashCode(), 
                    Tools.HashCombine(y.GetHashCode(), 
                    Tools.HashCombine(OwnerIndex.GetHashCode(), 
                    Tools.HashCombine((Life / maxlife).GetHashCode(), 
                                      IsDestroy.GetHashCode()
                    )))));
+            return hash;
         }
 
         public void UpdateLastHash()

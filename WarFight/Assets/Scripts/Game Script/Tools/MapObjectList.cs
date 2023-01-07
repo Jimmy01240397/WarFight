@@ -30,11 +30,11 @@ public class MapObjectList : ICollection
             {
                 case SelectMode.Index:
                     {
-                        return dict[index];
+                        return dict[list[index]];
                     }
                 case SelectMode.ID:
                     {
-                        return dict[list[index]];
+                        return dict[index];
                     }
                 default:
                     {
@@ -44,6 +44,11 @@ public class MapObjectList : ICollection
         }
     }
 
+    public MapObjectList()
+    {
+        dict = new Dictionary<int, MapObject>();
+        list = new List<int>();
+    }
     public override int GetHashCode()
     {
         if (Count <= 0) return 0;
@@ -75,9 +80,10 @@ public class MapObjectList : ICollection
 
     public void ResetMapObjects(IDictionary[] data)
     {
+        List<IDictionary> datalist = new List<IDictionary>(data);
         for(int i = 0; i < list.Count; i++)
         {
-            IDictionary[] nowdata = data.Where((now) => list[i] == (int)now["ID"]).ToArray();
+            IDictionary[] nowdata = datalist.Where((now) => list[i] == (int)now["ID"]).ToArray();
             if (nowdata.Length <= 0)
             {
                 Remove(list[i]);
@@ -86,7 +92,12 @@ public class MapObjectList : ICollection
             else
             {
                 SetMapObject(nowdata[0]);
+                datalist.Remove(nowdata[0]);
             }
+        }
+        foreach(IDictionary nowdata in data)
+        {
+            SetMapObject(nowdata);
         }
     }
 

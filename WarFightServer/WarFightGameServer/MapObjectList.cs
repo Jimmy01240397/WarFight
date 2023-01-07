@@ -32,6 +32,24 @@ namespace WarFightGameServer
             }
         }
 
+        public MapObject this[int OwnerIndex, int index]
+        {
+            get
+            {
+                lock (locker)
+                {
+                    foreach (string objclassname in dict.Keys)
+                    {
+                        int nowlen = GetCount(objclassname);
+                        if (index < nowlen)
+                            return this[objclassname, index];
+                        index -= nowlen;
+                    }
+                    throw new IndexOutOfRangeException();
+                }
+            }
+        }
+
         public MapObject this[string objclassname, int index]
         {
             get
@@ -50,6 +68,24 @@ namespace WarFightGameServer
             }
         }
 
+        public MapObject this[string objclassname, int OwnerIndex, int index]
+        {
+            get
+            {
+                lock (locker)
+                {
+                    foreach (string type in dict[objclassname].Keys)
+                    {
+                        int nowlen = GetCount(objclassname, type, OwnerIndex);
+                        if (index < nowlen)
+                            return this[objclassname, type, OwnerIndex, index];
+                        index -= nowlen;
+                    }
+                    throw new IndexOutOfRangeException();
+                }
+            }
+        }
+
         public MapObject this[string objclassname, string type, int index]
         {
             get
@@ -57,6 +93,17 @@ namespace WarFightGameServer
                 lock (locker)
                 {
                     return dict[objclassname][type][index];
+                }
+            }
+        }
+
+        public MapObject this[string objclassname, string type, int OwnerIndex, int index]
+        {
+            get
+            {
+                lock (locker)
+                {
+                    return dict[objclassname][type].Where((mapobj) => mapobj.OwnerIndex == OwnerIndex).ElementAt(index);
                 }
             }
         }
@@ -80,6 +127,19 @@ namespace WarFightGameServer
             }
         }
 
+        public int GetCount(int OwnerIndex)
+        {
+            lock (locker)
+            {
+                int len = 0;
+                foreach (string objclassname in dict.Keys)
+                {
+                    len += GetCount(objclassname, OwnerIndex);
+                }
+                return len;
+            }
+        }
+
         public int GetCount(string objclassname)
         {
             lock (locker)
@@ -95,6 +155,21 @@ namespace WarFightGameServer
                 return len;
             }
         }
+        public int GetCount(string objclassname, int OwnerIndex)
+        {
+            lock (locker)
+            {
+                int len = 0;
+                if (dict.ContainsKey(objclassname))
+                {
+                    foreach (string type in dict[objclassname].Keys)
+                    {
+                        len += GetCount(objclassname, type, OwnerIndex);
+                    }
+                }
+                return len;
+            }
+        }
 
         public int GetCount(string objclassname, string type)
         {
@@ -105,21 +180,37 @@ namespace WarFightGameServer
             }
         }
 
+        public int GetCount(string objclassname, string type, int OwnerIndex)
+        {
+            lock (locker)
+            {
+                if (!dict.ContainsKey(objclassname) || !dict[objclassname].ContainsKey(type)) return 0;
+                return dict[objclassname][type].Where((mapobj) => mapobj.OwnerIndex == OwnerIndex).Count();
+            }
+        }
+
         public MapObjectList()
         {
             dict = new Dictionary<string, Dictionary<string, List<MapObject>>>();
         }
 
-        public void Add<T>(params object[] args) where T : MapObject
+        public MapObject Add<T>(Room room, int OwnerIndex, int x, int y, params object[] args) where T : MapObject
         {
             lock (locker)
             {
-                MapObject mapObject = (MapObject)Activator.CreateInstance(typeof(T), args: args);
+                object[] allargs = new object[4 + args.Length];
+                allargs[0] = room;
+                allargs[1] = OwnerIndex;
+                allargs[2] = x;
+                allargs[3] = y;
+                args.CopyTo(allargs, 4);
+                MapObject mapObject = (MapObject)Activator.CreateInstance(typeof(T), args: allargs);
                 if (!dict.ContainsKey(mapObject.type.Split('/')[0]))
                     dict.Add(mapObject.type.Split('/')[0], new Dictionary<string, List<MapObject>>());
                 if (!dict[mapObject.type.Split('/')[0]].ContainsKey(mapObject.type.Split('/')[1]))
                     dict[mapObject.type.Split('/')[0]].Add(mapObject.type.Split('/')[1], new List<MapObject>());
                 dict[mapObject.type.Split('/')[0]][mapObject.type.Split('/')[1]].Add(mapObject);
+                return mapObject;
             }
         }
 
@@ -127,8 +218,8 @@ namespace WarFightGameServer
         {
             lock (locker)
             {
-                if (!dict.ContainsKey(mapObject.type.Split('/')[0]) || 
-                    !dict[mapObject.type.Split('/')[0]].ContainsKey(mapObject.type.Split('/')[1]) || 
+                if (!dict.ContainsKey(mapObject.type.Split('/')[0]) ||
+                    !dict[mapObject.type.Split('/')[0]].ContainsKey(mapObject.type.Split('/')[1]) ||
                     !dict[mapObject.type.Split('/')[0]][mapObject.type.Split('/')[1]].Contains(mapObject)) return false;
                 dict[mapObject.type.Split('/')[0]][mapObject.type.Split('/')[1]].Remove(mapObject);
                 return true;
@@ -140,9 +231,9 @@ namespace WarFightGameServer
             dynamic output = 0;
             foreach (var data in (Dictionary<string, IDictionary>)Program.appllication.DataBase[objclassname])
             {
-                if(data.Value.Keys.OfType<string>().Contains(attributeName))
+                if (data.Value.Keys.OfType<string>().Contains(attributeName))
                 {
-                    output += GetCount(objclassname, data.Key) * (dynamic)data.Value[attributeName];
+                    output += GetCount(objclassname, data.Key, OwnerIndex) * (dynamic)data.Value[attributeName];
                 }
             }
             return (T)output;
@@ -156,6 +247,14 @@ namespace WarFightGameServer
                     array.SetValue(this[i], index + i);
             }
         }
+        public void CopyTo(Array array, int OwnerIndex, int index)
+        {
+            lock (locker)
+            {
+                for (int i = 0; i < GetCount() && i + index < array.Length; i++)
+                    array.SetValue(this[OwnerIndex, i], index + i);
+            }
+        }
 
         public void CopyTo(Array array, string objclassname, int index)
         {
@@ -163,6 +262,14 @@ namespace WarFightGameServer
             {
                 for (int i = 0; i < GetCount(objclassname) && i + index < array.Length; i++)
                     array.SetValue(this[objclassname, i], index + i);
+            }
+        }
+        public void CopyTo(Array array, string objclassname, int OwnerIndex, int index)
+        {
+            lock (locker)
+            {
+                for (int i = 0; i < GetCount(objclassname, OwnerIndex) && i + index < array.Length; i++)
+                    array.SetValue(this[objclassname, OwnerIndex, i], index + i);
             }
         }
         public void CopyTo(Array array, string objclassname, string type, int index)
@@ -173,6 +280,14 @@ namespace WarFightGameServer
                     array.SetValue(this[objclassname, type, i], index + i);
             }
         }
+        public void CopyTo(Array array, string objclassname, string type, int OwnerIndex, int index)
+        {
+            lock (locker)
+            {
+                for (int i = 0; i < GetCount(objclassname, type, OwnerIndex) && i + index < array.Length; i++)
+                    array.SetValue(this[objclassname, type, OwnerIndex, i], index + i);
+            }
+        }
 
         public MapObject[] ToArray()
         {
@@ -180,6 +295,15 @@ namespace WarFightGameServer
             {
                 MapObject[] mapObjects = new MapObject[GetCount()];
                 CopyTo(mapObjects, 0);
+                return mapObjects;
+            }
+        }
+        public MapObject[] ToArray(int OwnerIndex)
+        {
+            lock (locker)
+            {
+                MapObject[] mapObjects = new MapObject[GetCount(OwnerIndex)];
+                CopyTo(mapObjects, OwnerIndex, 0);
                 return mapObjects;
             }
         }
@@ -193,6 +317,15 @@ namespace WarFightGameServer
                 return mapObjects;
             }
         }
+        public MapObject[] ToArray(string objclassname, int OwnerIndex)
+        {
+            lock (locker)
+            {
+                MapObject[] mapObjects = new MapObject[GetCount(objclassname, OwnerIndex)];
+                CopyTo(mapObjects, objclassname, OwnerIndex, 0);
+                return mapObjects;
+            }
+        }
         public MapObject[] ToArray(string objclassname, string type)
         {
             lock (locker)
@@ -202,17 +335,26 @@ namespace WarFightGameServer
                 return mapObjects;
             }
         }
+        public MapObject[] ToArray(string objclassname, string type, int OwnerIndex)
+        {
+            lock (locker)
+            {
+                MapObject[] mapObjects = new MapObject[GetCount(objclassname, type, OwnerIndex)];
+                CopyTo(mapObjects, objclassname, type, OwnerIndex, 0);
+                return mapObjects;
+            }
+        }
 
         public override int GetHashCode()
         {
-            lock(locker)
+            lock (locker)
             {
                 if (Count <= 0) return 0;
                 MapObject[] mapObjects = ToArray();
                 Array.Sort(mapObjects, (a, b) => a.Hash().CompareTo(b.Hash()));
                 int output = mapObjects[0].Hash();
                 for (int i = 1; i < Count; i++)
-                    if(!mapObjects[i].IsDestroy)
+                    if (!mapObjects[i].IsDestroy)
                         output = Tools.HashCombine(output, mapObjects[i].Hash());
                 return output;
             }

@@ -10,7 +10,7 @@ public class BuildingObject : MapObject
     {
         Vector2 spritesize = GetComponent<SpriteRenderer>().sprite.rect.size;
         MaxLife = (float)GameManager.Instance.Builds[type]["life"];
-        transform.localScale = new Vector3(TilemapSetting.unit * (float)GameManager.Instance.Builds[type]["width"] / spritesize.x, TilemapSetting.unit * (float)GameManager.Instance.Builds[type]["height"] / spritesize.y, 1);
+        transform.localScale = new Vector3(TilemapSetting.unit * ((int)GameManager.Instance.Builds[type]["width"] + 1) / spritesize.x, TilemapSetting.unit * ((int)GameManager.Instance.Builds[type]["height"] + 1) / spritesize.y, 1);
         //MaxLife = (float)GameManager.Instance.Builds[type]["life"];
 
         base.Awake();

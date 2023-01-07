@@ -15,6 +15,11 @@ public class PeopleObject : MapObject
         GetComponent<Animator>().SetBool("special_moving", ((Dictionary<string, bool>)data["animation"])["special_moving"]);
     }
 
+    public override int GetHashCode()
+    {
+        return PacketType.Tools.HashCombine(base.GetHashCode(), PacketType.Tools.HashCombine(GetComponent<Animator>().GetBool("walking").GetHashCode(), GetComponent<Animator>().GetBool("special_moving").GetHashCode()));
+    }
+
     protected override void Awake()
     {
 
